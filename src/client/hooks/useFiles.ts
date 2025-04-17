@@ -10,6 +10,7 @@ interface UseFilesResult {
     loading: boolean;
     error: string | null;
     refresh: () => void;
+    deleteFile: (fileName: string) => Promise<void>;
 }
 
 export function useFiles(): UseFilesResult {
@@ -21,6 +22,22 @@ export function useFiles(): UseFilesResult {
     const refresh = useCallback(() => {
         setRefreshKey((k) => k + 1);
     }, []);
+
+    const deleteFile = async (fileName: string): Promise<void> => {
+        try {
+            const response = await fetch(`/api/files/${fileName}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete file');
+            }
+
+            refresh();
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Unknown error');
+        }
+    };
 
     useEffect(() => {
         let isMounted = true;
@@ -54,5 +71,5 @@ export function useFiles(): UseFilesResult {
         };
     }, [refreshKey]);
 
-    return { files, loading, error, refresh };
+    return { files, loading, error, refresh, deleteFile };
 }

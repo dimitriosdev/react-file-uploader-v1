@@ -5,7 +5,7 @@ import { useFiles } from '../hooks/useFiles';
 import { FileIcon } from './FileUpload/FileUploadIcons';
 
 const FileListView: React.FC = () => {
-    const { files, loading, error } = useFiles();
+    const { files, loading, error, deleteFile } = useFiles();
 
     if (loading) {
         return <div>Loading files...</div>;
@@ -26,6 +26,12 @@ const FileListView: React.FC = () => {
                         <p className="text-sm font-medium text-gray-700 truncate">{file.name}</p>
                         <p className="text-xs text-gray-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                     </div>
+                    <button
+                        onClick={() => deleteFile(file.name)}
+                        className="ml-4 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                        Delete
+                    </button>
                 </li>
             ))}
         </ul>

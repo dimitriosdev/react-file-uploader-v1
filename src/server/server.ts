@@ -120,3 +120,20 @@ app.get('/api/files', async (_req, res) => {
         return res.status(500).json({ message });
     }
 });
+
+app.delete('/api/files/:fileName', async (req, res) => {
+    const { fileName } = req.params;
+    const filePath = join(UPLOAD_DIR, fileName);
+
+    try {
+        if (!existsSync(filePath)) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        unlinkSync(filePath);
+        return res.status(200).json({ message: 'File deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        return res.status(500).json({ error: 'Error deleting file' });
+    }
+});
