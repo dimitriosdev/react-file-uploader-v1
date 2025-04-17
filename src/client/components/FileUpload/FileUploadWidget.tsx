@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import DragAndDropArea from './DragAndDropArea';
 import { UploadIcon } from './FileUploadIcons';
 import { useFileUploader } from './useFileUploader';
 import { validateFiles } from './useFileValidation';
@@ -16,7 +17,7 @@ export interface FileUploadProps {
     autoUpload?: boolean;
     className?: string;
     validationErrors?: string[];
-    testId?: string; // Add testId prop
+    testId?: string;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -31,7 +32,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     autoUpload = false,
     className = '',
     validationErrors: validationErrorsProp,
-    testId, // Destructure testId
+    testId,
 }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [validationErrorsState, setValidationErrors] = useState<string[]>([]);
@@ -58,6 +59,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
     };
 
+    const handleFiles = (files: File[]) => {
+        const { validFiles, errors } = validateFiles(files, acceptedFileTypes, maxSizeMB);
+        setSelectedFiles(validFiles);
+        setValidationErrors(errors);
+        if (onFileSelect) {
+            onFileSelect(validFiles);
+        }
+        if (autoUpload && uploadUrl && validFiles.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            uploadFiles(validFiles, id);
+        }
+    };
+
     const handleUploadClick = () => {
         if (selectedFiles.length > 0 && uploadUrl) {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -65,7 +79,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
     };
 
-    // Add focus management and keyboard navigation
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Enter' || event.key === ' ') {
             const inputElement = document.getElementById(id) as HTMLInputElement | null;
@@ -76,81 +89,88 @@ const FileUpload: React.FC<FileUploadProps> = ({
     };
 
     return (
-        <div className={`file-upload ${className} flex flex-col items-center`}>
-            <label
-                htmlFor={id}
-                className="file-upload-label border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 w-full"
-                aria-label={label}
-            >
-                <div
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={handleKeyDown}
-                    className="w-full flex flex-col items-center justify-center outline-none"
+        <DragAndDropArea
+            onFiles={handleFiles}
+            multiple={multiple}
+            acceptedFileTypes={acceptedFileTypes}
+            maxSizeMB={maxSizeMB}
+        >
+            <div className={`file-upload ${className} flex flex-col items-center`}>
+                <label
+                    htmlFor={id}
+                    className="file-upload-label border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 w-full"
+                    aria-label={label}
                 >
-                    <UploadIcon size={40} className="text-blue-500 mb-2" ariaLabel="Upload icon" />
-                    <span className="text-sm text-gray-600" aria-hidden="true">
-                        {label}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1" aria-hidden="true">
-                        {multiple ? 'Drag files here or click to browse' : 'Drag a file here or click to browse'}
-                    </span>
-                </div>
-                <input
-                    type="file"
-                    id={id}
-                    accept={acceptedFileTypes}
-                    multiple={multiple}
-                    onChange={handleFileChange}
-                    className="hidden"
-                    aria-describedby="file-upload-description"
-                    data-testid={testId || id} // Use testId if provided, else id
-                />
-            </label>
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={handleKeyDown}
+                        className="w-full flex flex-col items-center justify-center outline-none"
+                    >
+                        <UploadIcon size={40} className="text-blue-500 mb-2" ariaLabel="Upload icon" />
+                        <span className="text-sm text-gray-600" aria-hidden="true">
+                            {label}
+                        </span>
+                        <span className="text-xs text-gray-400 mt-1" aria-hidden="true">
+                            {multiple ? 'Drag files here or click to browse' : 'Drag a file here or click to browse'}
+                        </span>
+                    </div>
+                    <input
+                        type="file"
+                        id={id}
+                        accept={acceptedFileTypes}
+                        multiple={multiple}
+                        onChange={handleFileChange}
+                        className="hidden"
+                        aria-describedby="file-upload-description"
+                        data-testid={testId || id}
+                    />
+                </label>
 
-            {validationErrors.length > 0 && (
-                <ul className="text-red-500 mt-2 text-xs" aria-live="polite">
-                    {validationErrors.map((err, idx) => (
-                        <li key={idx}>{err}</li>
-                    ))}
-                </ul>
-            )}
+                {validationErrors.length > 0 && (
+                    <ul className="text-red-500 mt-2 text-xs" aria-live="polite">
+                        {validationErrors.map((err, idx) => (
+                            <li key={idx}>{err}</li>
+                        ))}
+                    </ul>
+                )}
 
-            {uploadUrl && !autoUpload && selectedFiles.length > 0 && (
-                <button
-                    onClick={handleUploadClick}
-                    disabled={uploading}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
-                    aria-disabled={uploading}
-                >
-                    {uploading ? 'Uploading...' : 'Upload'}
-                </button>
-            )}
+                {uploadUrl && !autoUpload && selectedFiles.length > 0 && (
+                    <button
+                        onClick={handleUploadClick}
+                        disabled={uploading}
+                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                        aria-disabled={uploading}
+                    >
+                        {uploading ? 'Uploading...' : 'Upload'}
+                    </button>
+                )}
 
-            {uploadStatus === 'uploading' && (
-                <div
-                    className="w-full bg-gray-200 rounded-full h-2.5 mt-2"
-                    role="progressbar"
-                    aria-valuenow={uploadProgress}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                >
-                    <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
-                </div>
-            )}
+                {uploadStatus === 'uploading' && (
+                    <div
+                        className="w-full bg-gray-200 rounded-full h-2.5 mt-2"
+                        role="progressbar"
+                        aria-valuenow={uploadProgress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                    >
+                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
+                )}
 
-            {uploadStatus === 'success' && (
-                <div className="text-green-500 mt-2 text-sm" role="status">
-                    Files uploaded successfully!
-                </div>
-            )}
+                {uploadStatus === 'success' && (
+                    <div className="text-green-500 mt-2 text-sm" role="status">
+                        Files uploaded successfully!
+                    </div>
+                )}
 
-            {uploadStatus === 'error' && (
-                <div className="text-red-500 mt-2 text-sm" role="alert">
-                    Error uploading files. Please try again.
-                </div>
-            )}
-        </div>
+                {uploadStatus === 'error' && (
+                    <div className="text-red-500 mt-2 text-sm" role="alert">
+                        Error uploading files. Please try again.
+                    </div>
+                )}
+            </div>
+        </DragAndDropArea>
     );
 };
 
