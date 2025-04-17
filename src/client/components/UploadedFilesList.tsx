@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { FileIcon } from './FileUpload/Icons';
 
 interface FileInfo {
@@ -15,7 +16,9 @@ const UploadedFilesList: React.FC = () => {
             setLoading(true);
             try {
                 const response = await fetch('/api/files');
-                if (!response.ok) throw new Error('Failed to fetch files');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch files');
+                }
                 const data = await response.json();
                 setFiles(data.files || []);
             } catch (e) {
@@ -27,8 +30,12 @@ const UploadedFilesList: React.FC = () => {
         fetchFiles();
     }, []);
 
-    if (loading) return <div>Loading files...</div>;
-    if (files.length === 0) return <div>No files uploaded yet.</div>;
+    if (loading) {
+        return <div>Loading files...</div>;
+    }
+    if (files.length === 0) {
+        return <div>No files uploaded yet.</div>;
+    }
 
     return (
         <ul className="space-y-2 max-h-[400px] overflow-y-auto">

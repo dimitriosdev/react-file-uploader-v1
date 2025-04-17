@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 
-import { FileIcon, UploadIcon } from './Icons';
+import { UploadIcon } from './Icons';
 import './FileUpload.css';
+import { useFileUploader } from './useFileUploader';
+import { validateFiles } from './validateFiles';
 
 export interface FileUploadProps {
     onFileSelect?: (files: File[]) => void;
@@ -22,7 +24,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
     onUploadComplete,
     multiple = false,
     acceptedFileTypes = 'image/*',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     maxSizeMB = 5,
     label = 'Upload File',
     id = 'file-upload',
@@ -31,77 +32,31 @@ const FileUpload: React.FC<FileUploadProps> = ({
     className = '',
 }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [uploading, setUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
-    const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+    const [validationErrors, setValidationErrors] = useState<string[]>([]);
+    const { uploading, uploadProgress, uploadStatus, uploadFiles } = useFileUploader({
+        uploadUrl: uploadUrl || '',
+        onUploadComplete,
+    });
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files && files.length > 0) {
             const fileArray = Array.from(files);
-            setSelectedFiles(fileArray);
-
+            const { validFiles, errors } = validateFiles(fileArray, acceptedFileTypes, maxSizeMB);
+            setSelectedFiles(validFiles);
+            setValidationErrors(errors);
             if (onFileSelect) {
-                onFileSelect(fileArray);
+                onFileSelect(validFiles);
             }
-
-            if (autoUpload && uploadUrl) {
-                void uploadFiles(fileArray);
+            if (autoUpload && uploadUrl && validFiles.length > 0) {
+                uploadFiles(validFiles, id);
             }
-        }
-    };
-
-    const uploadFiles = async (files: File[]) => {
-        if (!uploadUrl || files.length === 0) {
-            return;
-        }
-
-        setUploading(true);
-        setUploadStatus('uploading');
-        setUploadProgress(0);
-
-        try {
-            const formData = new FormData();
-            for (const file of files) {
-                formData.append('file', file, file.name);
-            }
-
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error(`Upload failed with status: ${response.status}`);
-            }
-
-            const data = (await response.json()) as { message: string };
-            console.log('Upload successful:', data);
-            setUploadStatus('success');
-
-            // Notify parent component that upload is complete
-            if (onUploadComplete) {
-                onUploadComplete();
-            }
-
-            // Reset file selection after successful upload
-            setSelectedFiles([]);
-            // Reset the file input
-            if (document.getElementById(id) instanceof HTMLInputElement) {
-                (document.getElementById(id) as HTMLInputElement).value = '';
-            }
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            setUploadStatus('error');
-        } finally {
-            setUploading(false);
-            setUploadProgress(100);
         }
     };
 
     const handleUploadClick = () => {
         if (selectedFiles.length > 0 && uploadUrl) {
-            void uploadFiles(selectedFiles);
+            uploadFiles(selectedFiles, id);
         }
     };
 
@@ -125,6 +80,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     className="hidden"
                 />
             </label>
+
+            {validationErrors.length > 0 && (
+                <ul className="text-red-500 mt-2 text-xs">
+                    {validationErrors.map((err, idx) => (
+                        <li key={idx}>{err}</li>
+                    ))}
+                </ul>
+            )}
 
             {uploadUrl && !autoUpload && selectedFiles.length > 0 && (
                 <button
