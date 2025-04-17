@@ -8,7 +8,7 @@ export interface FileUploadProps {
     onUploadComplete?: () => void;
     multiple?: boolean;
     acceptedFileTypes?: string;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     maxSizeMB?: number;
     label?: string;
     id?: string;
@@ -126,48 +126,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 />
             </label>
 
-            {selectedFiles.length > 0 && (
-                <div className="selected-files mt-4 w-full">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Files:</h3>
-                    <ul className="space-y-2">
-                        {selectedFiles.map((file, index) => (
-                            <li key={index} className="flex items-center bg-gray-50 p-2 rounded">
-                                <FileIcon className="text-gray-500 mr-2" size={18} />
-                                <span className="text-sm text-gray-600 truncate">{file.name}</span>
-                                <span className="text-xs text-gray-400 ml-auto">
-                                    {(file.size / (1024 * 1024)).toFixed(2)} MB
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
+            {uploadUrl && !autoUpload && selectedFiles.length > 0 && (
+                <button
+                    onClick={handleUploadClick}
+                    disabled={uploading}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                    {uploading ? 'Uploading...' : 'Upload'}
+                </button>
+            )}
 
-                    {uploadUrl && !autoUpload && (
-                        <button
-                            onClick={handleUploadClick}
-                            disabled={uploading}
-                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
-                        >
-                            {uploading ? 'Uploading...' : 'Upload'}
-                        </button>
-                    )}
-
-                    {uploadStatus === 'uploading' && (
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                            <div
-                                className="bg-blue-600 h-2.5 rounded-full"
-                                style={{ width: `${uploadProgress}%` }}
-                            ></div>
-                        </div>
-                    )}
-
-                    {uploadStatus === 'success' && (
-                        <div className="text-green-500 mt-2 text-sm">Files uploaded successfully!</div>
-                    )}
-
-                    {uploadStatus === 'error' && (
-                        <div className="text-red-500 mt-2 text-sm">Error uploading files. Please try again.</div>
-                    )}
+            {uploadStatus === 'uploading' && (
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                    <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
+            )}
+
+            {uploadStatus === 'success' && (
+                <div className="text-green-500 mt-2 text-sm">Files uploaded successfully!</div>
+            )}
+
+            {uploadStatus === 'error' && (
+                <div className="text-red-500 mt-2 text-sm">Error uploading files. Please try again.</div>
             )}
         </div>
     );
