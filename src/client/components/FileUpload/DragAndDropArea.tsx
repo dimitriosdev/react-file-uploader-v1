@@ -33,6 +33,7 @@ const DragAndDropArea: React.FC<DragAndDropAreaProps> = ({ onFiles, multiple, ch
         setDragActive(false);
     };
     return (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
