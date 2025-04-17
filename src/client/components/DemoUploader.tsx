@@ -1,14 +1,13 @@
 import React from 'react';
 
-import { useFiles } from '../hooks/useFiles';
-
 import { FileUploadWidget } from './FileUpload';
 
-const DemoUploader: React.FC = () => {
-    const { refresh } = useFiles();
+interface DemoUploaderProps {
+    refresh: () => void;
+}
 
+const DemoUploader: React.FC<DemoUploaderProps> = ({ refresh }) => {
     const handleFilesUploaded = () => {
-        // Refresh the file list after upload
         refresh();
     };
 

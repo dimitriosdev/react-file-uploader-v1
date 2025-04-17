@@ -1,11 +1,9 @@
-import { useState } from 'react';
-
 import DemoUploader from './components/DemoUploader';
 import FileListView from './components/FileListView';
+import { useFiles } from './hooks/useFiles';
 
 export const App = () => {
-    const [page, setPage] = useState<'upload' | 'files'>('upload');
-
+    const { files, loading, error, refresh, deleteFile } = useFiles();
     return (
         <main className="relative isolate h-dvh" role="main">
             <a href="#content" className="sr-only focus:not-sr-only">
@@ -20,26 +18,10 @@ export const App = () => {
 
             <div id="content" className="mx-auto max-w-7xl px-6 py-32 text-center sm:py-40 lg:px-8">
                 <h1 className="mb-8 text-3xl font-bold tracking-tight text-gray-800 sm:text-4xl">File Uploader Demo</h1>
-                <div className="flex justify-center gap-4 mb-6">
-                    <button
-                        className={`px-4 py-2 rounded ${page === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-                        onClick={() => page !== 'upload' && setPage('upload')}
-                        aria-pressed={page === 'upload'}
-                        disabled={page === 'upload'}
-                    >
-                        Upload Files
-                    </button>
-                    <button
-                        className={`px-4 py-2 rounded ${page === 'files' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-                        onClick={() => page !== 'files' && setPage('files')}
-                        aria-pressed={page === 'files'}
-                        disabled={page === 'files'}
-                    >
-                        View Files
-                    </button>
-                </div>
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                    {page === 'upload' ? <DemoUploader /> : <FileListView />}
+                    <DemoUploader refresh={refresh} />
+                    <div className="my-8 border-t border-gray-200"></div>
+                    <FileListView files={files} loading={loading} error={error} deleteFile={deleteFile} />
                 </div>
             </div>
         </main>

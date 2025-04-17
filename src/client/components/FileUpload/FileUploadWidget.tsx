@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 import { UploadIcon } from './FileUploadIcons';
-import './FileUpload.css';
 import { useFileUploader } from './useFileUploader';
 import { validateFiles } from './useFileValidation';
 
