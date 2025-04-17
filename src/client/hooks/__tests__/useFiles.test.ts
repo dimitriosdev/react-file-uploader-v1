@@ -5,15 +5,15 @@ import { useFiles } from '../useFiles';
 
 // Mock fetch globally for all tests
 beforeEach(() => {
-    global.fetch = vi.fn((url: string, options?: { method?: string }) => {
-        if (options && options.method === 'DELETE') {
+    global.fetch = vi.fn((_input: RequestInfo, init?: RequestInit) => {
+        if (init && init.method === 'DELETE') {
             return Promise.resolve({ ok: true }) as unknown as Response;
         }
         return Promise.resolve({
             ok: true,
             json: () => Promise.resolve({ files: [{ name: 'file1.txt', size: 1234 }] }),
         }) as unknown as Response;
-    });
+    }) as unknown as typeof fetch;
 });
 afterEach(() => {
     vi.clearAllMocks();
