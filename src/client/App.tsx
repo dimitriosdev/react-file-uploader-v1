@@ -1,6 +1,7 @@
 import { useState } from 'react';
+
 import DemoUploader from './components/DemoUploader';
-import UploadedFilesList from './components/UploadedFilesList';
+import FileListView from './components/FileListView';
 
 export const App = () => {
     const [page, setPage] = useState<'upload' | 'files'>('upload');
@@ -27,11 +28,11 @@ export const App = () => {
                         className={`px-4 py-2 rounded ${page === 'files' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
                         onClick={() => setPage('files')}
                     >
-                        View Uploaded Files
+                        View Files
                     </button>
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                    {page === 'upload' ? <DemoUploader /> : <UploadedFilesList />}
+                    {page === 'upload' ? <DemoUploader /> : <FileListView />}
                 </div>
             </div>
         </main>

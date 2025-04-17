@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-import { UploadIcon } from './Icons';
+import { UploadIcon } from './FileUploadIcons';
 import './FileUpload.css';
-import { useFileUploader } from './useFileUploader';
-import { validateFiles } from './validateFiles';
+import { validateFiles } from './useFileValidation';
+import { useFileUploader } from './useSingleFileUploader';
 
 export interface FileUploadProps {
     onFileSelect?: (files: File[]) => void;

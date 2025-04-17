@@ -1,46 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import FileUpload from './FileUpload/FileUpload';
-import { FileIcon } from './FileUpload/Icons';
+import { useFiles } from '../hooks/useFiles';
 
-interface FileInfo {
-    name: string;
-    size: number;
-}
-
-interface ApiResponse {
-    files: FileInfo[];
-}
+import { FileUploadWidget } from './FileUpload';
 
 const DemoUploader: React.FC = () => {
-    const [uploadedFiles, setUploadedFiles] = useState<FileInfo[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [refreshKey, setRefreshKey] = useState(0);
-
-    // Fetch uploaded files from the server
-    useEffect(() => {
-        const fetchFiles = async () => {
-            setIsLoading(true);
-            try {
-                const response = await fetch('/api/files');
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch files: ${response.status}`);
-                }
-                const data = (await response.json()) as ApiResponse;
-                setUploadedFiles(data.files || []);
-            } catch (error) {
-                console.error('Error fetching files:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        void fetchFiles();
-    }, [refreshKey]);
+    const { refresh } = useFiles();
 
     const handleFilesUploaded = () => {
         // Refresh the file list after upload
-        setRefreshKey((prevKey) => prevKey + 1);
+        refresh();
     };
 
     return (
@@ -49,7 +18,7 @@ const DemoUploader: React.FC = () => {
                 <div className="upload-container p-4 bg-white rounded-lg shadow border border-gray-200">
                     <h2 className="text-lg font-medium text-gray-800 mb-4">Upload Files</h2>
                     <div className="image-upload-demo">
-                        <FileUpload
+                        <FileUploadWidget
                             onFileSelect={(files) => {
                                 console.log('Selected files:', files);
                             }}
