@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { useFileUploader } from '../useFileUploader';
 
 beforeEach(() => {
@@ -37,9 +38,11 @@ describe('useFileUploader', () => {
     });
 
     it('should set error status on upload failure', async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-types
         (global.fetch as unknown as { mockImplementationOnce: Function }).mockImplementationOnce(() =>
             Promise.resolve({ ok: false, status: 500 })
         );
+
         const { result } = renderHook(() => useFileUploader({ uploadUrl: '/api/upload' }));
         const file = new File(['fail'], 'fail.txt', { type: 'text/plain' });
         await act(async () => {

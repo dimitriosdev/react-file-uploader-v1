@@ -1,8 +1,8 @@
 {
     "name": "frontify-frontend-task",
-    "private": true,
-    "version": "0.0.0",
     "type": "module",
+    "version": "0.0.0",
+    "private": true,
     "scripts": {
         "dev": "nodemon -w src/server -x tsx src/server/main.ts",
         "start": "NODE_ENV=production tsx src/server/main.ts",

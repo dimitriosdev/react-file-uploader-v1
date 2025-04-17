@@ -40,9 +40,11 @@ describe('useFiles', () => {
     });
 
     it('handles fetch error', async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-types
         (global.fetch as unknown as { mockImplementationOnce: Function }).mockImplementationOnce(() =>
             Promise.resolve({ ok: false })
         );
+
         const { result } = renderHook(() => useFiles());
         await act(async () => {});
         expect(result.current.error).toBe('Failed to fetch files');

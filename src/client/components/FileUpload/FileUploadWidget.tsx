@@ -52,6 +52,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 onFileSelect(validFiles);
             }
             if (autoUpload && uploadUrl && validFiles.length > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 uploadFiles(validFiles, id);
             }
         }
@@ -59,6 +60,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     const handleUploadClick = () => {
         if (selectedFiles.length > 0 && uploadUrl) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             uploadFiles(selectedFiles, id);
         }
     };

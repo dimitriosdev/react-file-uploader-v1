@@ -27,8 +27,12 @@ const FileListView: React.FC<FileListViewProps> = ({ files, loading, error, dele
         if (sortBy === 'type') {
             const extA = a.name.split('.').pop()?.toLowerCase() || '';
             const extB = b.name.split('.').pop()?.toLowerCase() || '';
-            if (extA < extB) return -1;
-            if (extA > extB) return 1;
+            if (extA < extB) {
+                return -1;
+            }
+            if (extA > extB) {
+                return 1;
+            }
             return a.name.localeCompare(b.name);
         } else {
             return a.name.localeCompare(b.name);
