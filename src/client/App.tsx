@@ -7,7 +7,10 @@ export const App = () => {
     const [page, setPage] = useState<'upload' | 'files'>('upload');
 
     return (
-        <main className="relative isolate h-dvh">
+        <main className="relative isolate h-dvh" role="main">
+            <a href="#content" className="sr-only focus:not-sr-only">
+                Skip to Content
+            </a>
             <img
                 src="https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJwYXRoIjoid2VhcmVcL2FjY291bnRzXC82ZVwvNDAwMDM4OFwvcHJvamVjdHNcLzk4NFwvYXNzZXRzXC9iOFwvMTE1MjY1XC8xMjYwMTU0YzFhYmVmMDVjNjZlY2Q2MDdmMTRhZTkxNS0xNjM4MjU4MjQwLmpwZyJ9:weare:_kpZgwnGPTxOhYxIyfS1MhuZmxGrFCzP6ZW6dc-F6BQ?width=2400"
                 alt="background image"
@@ -15,18 +18,22 @@ export const App = () => {
                 className="absolute inset-0 -z-10 h-full w-full object-cover object-top"
             />
 
-            <div className="mx-auto max-w-7xl px-6 py-32 text-center sm:py-40 lg:px-8">
+            <div id="content" className="mx-auto max-w-7xl px-6 py-32 text-center sm:py-40 lg:px-8">
                 <h1 className="mb-8 text-3xl font-bold tracking-tight text-gray-800 sm:text-4xl">File Uploader Demo</h1>
                 <div className="flex justify-center gap-4 mb-6">
                     <button
                         className={`px-4 py-2 rounded ${page === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-                        onClick={() => setPage('upload')}
+                        onClick={() => page !== 'upload' && setPage('upload')}
+                        aria-pressed={page === 'upload'}
+                        disabled={page === 'upload'}
                     >
                         Upload Files
                     </button>
                     <button
                         className={`px-4 py-2 rounded ${page === 'files' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-                        onClick={() => setPage('files')}
+                        onClick={() => page !== 'files' && setPage('files')}
+                        aria-pressed={page === 'files'}
+                        disabled={page === 'files'}
                     >
                         View Files
                     </button>

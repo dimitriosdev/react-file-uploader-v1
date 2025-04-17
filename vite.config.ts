@@ -8,5 +8,8 @@ export default defineConfig({
         env: {
             NODE_ENV: 'test',
         },
+        environment: process.env.VITEST_ENV === 'node' || process.env.TEST_ENV === 'node' ? 'node' : 'jsdom',
+        setupFiles: ['./src/server/test/setup.ts'],
+        include: ['src/client/**/*.test.{ts,tsx}', 'src/server/test/**/*.spec.ts'],
     },
 });

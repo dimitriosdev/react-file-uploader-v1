@@ -10,13 +10,14 @@ export interface FileUploadProps {
     onUploadComplete?: () => void;
     multiple?: boolean;
     acceptedFileTypes?: string;
-
     maxSizeMB?: number;
     label?: string;
     id?: string;
     uploadUrl?: string;
     autoUpload?: boolean;
     className?: string;
+    validationErrors?: string[];
+    testId?: string; // Add testId prop
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -30,9 +31,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
     uploadUrl,
     autoUpload = false,
     className = '',
+    validationErrors: validationErrorsProp,
+    testId, // Destructure testId
 }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [validationErrors, setValidationErrors] = useState<string[]>([]);
+    const [validationErrorsState, setValidationErrors] = useState<string[]>([]);
+    const validationErrors = validationErrorsProp !== undefined ? validationErrorsProp : validationErrorsState;
     const { uploading, uploadProgress, uploadStatus, uploadFiles } = useFileUploader({
         uploadUrl: uploadUrl || '',
         onUploadComplete,
@@ -60,17 +64,37 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
     };
 
+    // Add focus management and keyboard navigation
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            const inputElement = document.getElementById(id) as HTMLInputElement | null;
+            if (inputElement) {
+                inputElement.click();
+            }
+        }
+    };
+
     return (
         <div className={`file-upload ${className} flex flex-col items-center`}>
             <label
                 htmlFor={id}
                 className="file-upload-label border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 w-full"
+                aria-label={label}
             >
-                <UploadIcon size={40} className="text-blue-500 mb-2" />
-                <span className="text-sm text-gray-600">{label}</span>
-                <span className="text-xs text-gray-400 mt-1">
-                    {multiple ? 'Drag files here or click to browse' : 'Drag a file here or click to browse'}
-                </span>
+                <div
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={handleKeyDown}
+                    className="w-full flex flex-col items-center justify-center outline-none"
+                >
+                    <UploadIcon size={40} className="text-blue-500 mb-2" ariaLabel="Upload icon" />
+                    <span className="text-sm text-gray-600" aria-hidden="true">
+                        {label}
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1" aria-hidden="true">
+                        {multiple ? 'Drag files here or click to browse' : 'Drag a file here or click to browse'}
+                    </span>
+                </div>
                 <input
                     type="file"
                     id={id}
@@ -78,11 +102,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     multiple={multiple}
                     onChange={handleFileChange}
                     className="hidden"
+                    aria-describedby="file-upload-description"
+                    data-testid={testId || id} // Use testId if provided, else id
                 />
             </label>
 
             {validationErrors.length > 0 && (
-                <ul className="text-red-500 mt-2 text-xs">
+                <ul className="text-red-500 mt-2 text-xs" aria-live="polite">
                     {validationErrors.map((err, idx) => (
                         <li key={idx}>{err}</li>
                     ))}
@@ -94,23 +120,34 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     onClick={handleUploadClick}
                     disabled={uploading}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                    aria-disabled={uploading}
                 >
                     {uploading ? 'Uploading...' : 'Upload'}
                 </button>
             )}
 
             {uploadStatus === 'uploading' && (
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                <div
+                    className="w-full bg-gray-200 rounded-full h-2.5 mt-2"
+                    role="progressbar"
+                    aria-valuenow={uploadProgress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                >
                     <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
             )}
 
             {uploadStatus === 'success' && (
-                <div className="text-green-500 mt-2 text-sm">Files uploaded successfully!</div>
+                <div className="text-green-500 mt-2 text-sm" role="status">
+                    Files uploaded successfully!
+                </div>
             )}
 
             {uploadStatus === 'error' && (
-                <div className="text-red-500 mt-2 text-sm">Error uploading files. Please try again.</div>
+                <div className="text-red-500 mt-2 text-sm" role="alert">
+                    Error uploading files. Please try again.
+                </div>
             )}
         </div>
     );

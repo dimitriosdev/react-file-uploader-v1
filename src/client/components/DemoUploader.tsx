@@ -24,13 +24,14 @@ const DemoUploader: React.FC = () => {
                             }}
                             onUploadComplete={handleFilesUploaded}
                             multiple={true}
-                            acceptedFileTypes="*"
+                            acceptedFileTypes="image/*,application/pdf"
                             maxSizeMB={5}
                             label="Upload Files"
                             id="file-upload"
                             uploadUrl="/api/upload-single"
                             autoUpload={true}
                             className="image-upload"
+                            testId="file-upload-input"
                         />
                     </div>
                 </div>

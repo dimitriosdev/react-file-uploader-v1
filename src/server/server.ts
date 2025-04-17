@@ -121,7 +121,7 @@ app.get('/api/files', async (_req, res) => {
     }
 });
 
-app.delete('/api/files/:fileName', async (req, res) => {
+app.delete('/api/files/:fileName', (req, res) => {
     const { fileName } = req.params;
     const filePath = join(UPLOAD_DIR, fileName);
 
