@@ -24,22 +24,31 @@ export function useFileUploader({ uploadUrl, onUploadComplete }: UseFileUploader
         setUploading(true);
         setUploadStatus('uploading');
         setUploadProgress(0);
+
         try {
-            const formData = new FormData();
+            let completedUploads = 0;
             for (const file of files) {
+                const formData = new FormData();
                 formData.append('file', file, file.name);
+
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Upload failed for file ${file.name} with status: ${response.status}`);
+                }
+
+                completedUploads++;
+                setUploadProgress(Math.round((completedUploads / files.length) * 100));
             }
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                body: formData,
-            });
-            if (!response.ok) {
-                throw new Error(`Upload failed with status: ${response.status}`);
-            }
+
             setUploadStatus('success');
             if (onUploadComplete) {
                 onUploadComplete();
             }
+
             // Reset file input if provided
             if (inputId && document.getElementById(inputId) instanceof HTMLInputElement) {
                 (document.getElementById(inputId) as HTMLInputElement).value = '';
@@ -48,7 +57,6 @@ export function useFileUploader({ uploadUrl, onUploadComplete }: UseFileUploader
             setUploadStatus('error');
         } finally {
             setUploading(false);
-            setUploadProgress(100);
         }
     };
 
